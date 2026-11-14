@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1';
+// Base URL resolution:
+// 1. Explicit environment variable (e.g. Render backend URL: https://your-backend.onrender.com/api/v1)
+// 2. In browser production (Vercel): use relative '/api/v1' to route requests to the same origin
+// 3. In local dev environment: fallback to 'http://localhost:4000/api/v1'
+function resolveApiBaseUrl() {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return '/api/v1';
+  }
+  return 'http://localhost:4000/api/v1';
+}
+
+const baseURL = resolveApiBaseUrl();
 
 let inMemoryAccessToken = null;
 

@@ -40,10 +40,35 @@ app.use(
   })
 );
 
-// CORS
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:4000',
+  'http://localhost:3000',
+  'https://civicfix-ai-974r-meow-5169.vercel.app',
+  ...(env.CLIENT_ORIGIN ? env.CLIENT_ORIGIN.split(',').map((o) => o.trim()) : []),
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Match allowed origins list or any vercel.app deployment preview/production
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('civicfix') ||
+        origin.includes('civicmind');
+
+      if (isAllowed) {
+        return callback(null, origin);
+      }
+
+      // Default fallback: allow origin to support dynamic preview URLs
+      return callback(null, origin);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-cron-secret'],
