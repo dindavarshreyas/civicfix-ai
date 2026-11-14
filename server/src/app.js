@@ -24,6 +24,27 @@ export const app = express();
 // Required for Render reverse proxy
 app.set('trust proxy', 1);
 
+// Top-level CORS & Preflight handling (ensures all origins & OPTIONS requests succeed immediately)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, x-cron-secret, Bypass-Tunnel-Reminder, bypass-tunnel-reminder'
+    );
+  }
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
 // Security HTTP headers
 app.use(
   helmet({

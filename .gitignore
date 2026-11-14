@@ -17,6 +17,7 @@ client/.env.*
 !**/.env.template
 
 # Private keys, certificates & credentials
+*.exe
 *.pem
 *.key
 *.cert
